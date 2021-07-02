@@ -48,7 +48,7 @@ function updateEpic(token, issue, repo) {
             repo: repo.name,
             issue_number: issue.number,
         });
-        core.info(JSON.stringify(events.data[0], undefined, 2));
+        core.info(JSON.stringify(events.data, undefined, 2));
     });
 }
 function run() {
@@ -59,7 +59,6 @@ function run() {
             core.info(payload);
             const issue = github.context.payload.issue;
             const repo = github.context.payload.repository;
-            core.info(issue === null || issue === void 0 ? void 0 : issue.labels);
             if (issue && issue.labels.map((label) => label.name).includes('epic')) {
                 yield updateEpic(githubToken, issue, repo);
             }
