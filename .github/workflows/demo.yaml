@@ -16,6 +16,6 @@ jobs:
   epic-tasks:
     runs-on: ubuntu-latest
     steps:
-      - uses: Finkes/epic-tasks-action@v1
+      - uses: Finkes/epic-tasks-action@main
         with:
           githubToken: "todo"
