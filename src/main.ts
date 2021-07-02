@@ -44,11 +44,23 @@ async function updateNonEpic(token: string, issue: any, repo: any): Promise<void
         })
     core.info(JSON.stringify(events.data, undefined, 2))
 
-    const crossRefEvents = events.data.filter((event) => event.event === "cross-referenced" && event.source?.type === "issue")
-    await wait(5000) // wait until ref appears in timeline of epic?
-    for(const crossRefEvent of crossRefEvents){
-        await updateEpic(token, crossRefEvent.source?.issue, repo)
-    }
+    const commentEvents = events.data.filter((event) => event.event === "commented")
+    const issueRefsInBody = extractIssueRefs(issue.body)
+    const issueRefsInComments = commentEvents.map(event => extractIssueRefs(event.body!))
+    let issueRefs = [...issueRefsInBody, ...issueRefsInComments]
+
+    core.info("found some references to other issues:")
+    core.info(JSON.stringify(issueRefs))
+
+    // await wait(5000) // wait until ref appears in timeline of epic?
+    // for(const crossRefEvent of crossRefEvents){
+    //     await updateEpic(token, crossRefEvent.source?.issue, repo)
+    // }
+}
+
+function extractIssueRefs(text: string){
+    const refs = /#\d+/g.exec(text)
+    return [...new Set(refs)]
 }
 
 async function run(): Promise<void> {
