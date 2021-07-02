@@ -1,4 +1,4 @@
-name: 'build-test'
+name: 'demo'
 on:
   issues:
     types:
