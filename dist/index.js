@@ -83,7 +83,7 @@ function updateNonEpic(token, issue, repo) {
         core.info("found some references to other issues:");
         core.info(JSON.stringify(issueRefs));
         // todo fetch issues of refs, check for epic label (optional?)
-        for (const ref in issueRefs) {
+        for (const ref of issueRefs) {
             const refIssueRes = yield octo.rest.issues.get({
                 owner: repo.owner.login,
                 repo: repo.name,
