@@ -48,7 +48,7 @@ function updateEpic(token, issue, repo) {
             repo: repo.name,
             issue_number: issue.number,
         });
-        core.info(JSON.stringify(events, undefined, 2));
+        core.info(JSON.stringify(events.data, undefined, 2));
     });
 }
 function run() {
