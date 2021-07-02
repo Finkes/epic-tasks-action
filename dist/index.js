@@ -82,6 +82,19 @@ function updateNonEpic(token, issue, repo) {
         const issueRefs = [...new Set([...issueRefsInBody, ...issueRefsInComments])];
         core.info("found some references to other issues:");
         core.info(JSON.stringify(issueRefs));
+        // todo fetch issues of refs, check for epic label (optional?)
+        for (const ref in issueRefs) {
+            const refIssueRes = yield octo.rest.issues.get({
+                owner: repo.owner.login,
+                repo: repo.name,
+                issue_number: parseInt(ref),
+            });
+            const refIssue = refIssueRes.data;
+            if (refIssue && (refIssue === null || refIssue === void 0 ? void 0 : refIssue.labels.map((label) => label.name).includes('epic'))) {
+                core.info(`found epic ref: ${refIssue.number} `);
+                yield updateEpic(token, refIssue, repo);
+            }
+        }
         // await wait(5000) // wait until ref appears in timeline of epic?
         // for(const crossRefEvent of crossRefEvents){
         //     await updateEpic(token, crossRefEvent.source?.issue, repo)
@@ -89,8 +102,16 @@ function updateNonEpic(token, issue, repo) {
     });
 }
 function extractIssueRefs(text) {
-    const refs = /#\d+/g.exec(text);
-    return [...new Set(refs)];
+    const regex = /#\d+/g;
+    const refs = [];
+    let m;
+    do {
+        m = regex.exec(text);
+        if (m) {
+            refs.push(m[0]);
+        }
+    } while (m);
+    return refs;
 }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -100,7 +121,7 @@ function run() {
             core.info(payload);
             const issue = github.context.payload.issue;
             const repo = github.context.payload.repository;
-            if (issue && issue.labels.map((label) => label.name).includes('epic')) {
+            if (issue && (issue === null || issue === void 0 ? void 0 : issue.labels.map((label) => label.name).includes('epic'))) {
                 yield updateEpic(githubToken, issue, repo);
             }
             else {

@@ -55,6 +55,20 @@ async function updateNonEpic(token: string, issue: any, repo: any): Promise<void
     core.info("found some references to other issues:")
     core.info(JSON.stringify(issueRefs))
 
+    // todo fetch issues of refs, check for epic label (optional?)
+    for (const ref in issueRefs){
+        const refIssueRes = await octo.rest.issues.get({
+            owner: repo.owner.login,
+            repo: repo.name,
+            issue_number: parseInt(ref),
+        })
+        const refIssue = refIssueRes.data
+        if (refIssue && refIssue?.labels.map((label: any) => label.name).includes('epic')) {
+            core.info(`found epic ref: ${refIssue.number} `)
+            await updateEpic(token, refIssue, repo)
+        }
+    }
+
     // await wait(5000) // wait until ref appears in timeline of epic?
     // for(const crossRefEvent of crossRefEvents){
     //     await updateEpic(token, crossRefEvent.source?.issue, repo)
@@ -62,8 +76,16 @@ async function updateNonEpic(token: string, issue: any, repo: any): Promise<void
 }
 
 function extractIssueRefs(text: string){
-    const refs = /#\d+/g.exec(text)
-    return [...new Set(refs)]
+    const regex = /#\d+/g
+    const refs = []
+    let m
+    do {
+        m = regex.exec(text)
+        if (m) {
+            refs.push(m[0])
+        }
+    } while (m)
+    return refs
 }
 
 async function run(): Promise<void> {
@@ -75,7 +97,7 @@ async function run(): Promise<void> {
         const issue = github.context.payload.issue
         const repo = github.context.payload.repository
 
-        if (issue && issue.labels.map((label: any) => label.name).includes('epic')) {
+        if (issue && issue?.labels.map((label: any) => label.name).includes('epic')) {
             await updateEpic(githubToken, issue, repo)
         }
         else {
