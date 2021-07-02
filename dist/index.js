@@ -60,7 +60,7 @@ function run() {
             const issue = github.context.payload.issue;
             const repo = github.context.payload.repository;
             core.info(issue === null || issue === void 0 ? void 0 : issue.labels);
-            if (issue && issue.labels.includes('epic')) {
+            if (issue && issue.labels.map((label) => label.name).includes('epic')) {
                 yield updateEpic(githubToken, issue, repo);
             }
             // if issue is epic -> update epic

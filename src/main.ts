@@ -25,7 +25,7 @@ async function run(): Promise<void> {
     const repo = github.context.payload.repository
     core.info(issue?.labels)
 
-    if (issue && issue.labels.includes('epic')) {
+    if (issue && issue.labels.map((label: any) => label.name).includes('epic')) {
       await updateEpic(githubToken, issue, repo)
     }
     // if issue is epic -> update epic
