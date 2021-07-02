@@ -2,7 +2,6 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 
 async function updateEpic(token: string, issue: any, repo: any): Promise<void> {
-    core.info('todo update epic')
     const octo = github.getOctokit(token)
 
     const events = await octo
@@ -21,14 +20,43 @@ async function updateEpic(token: string, issue: any, repo: any): Promise<void> {
 
     core.info(taskListString)
 
+    const newBody = `### Linked Issues\n${taskListString}`
+
     await octo.rest.issues.update({
         owner: repo.owner.login,
         repo: repo.name,
         issue_number: issue.number as number,
-        body: taskListString,
+        body: newBody,
     })
+}
 
+async function updateNonEpic(token: string, issue: any, repo: any): Promise<void> {
+    const octo = github.getOctokit(token)
 
+    const events = await octo
+        .rest.issues.listEventsForTimeline({
+            owner: repo.owner.login,
+            repo: repo.name,
+            issue_number: issue.number as number,
+        })
+    core.info(JSON.stringify(events.data, undefined, 2))
+
+    // const crossRefEvents = events.data.filter((event) => event.event === "cross-referenced" && event.source?.type === "issue")
+    // const list = crossRefEvents.map((event) => `- [${(event.source?.issue?.state !== "open" ? "x" : " ")}] ${event.source?.issue?.title} ([#${event.source?.issue?.number}](${event.source?.issue?.html_url}))`)
+    //
+    //
+    // const taskListString = list.join('\n')
+    //
+    // core.info(taskListString)
+    //
+    // const newBody = `### Linked Issues\n${taskListString}`
+    //
+    // await octo.rest.issues.update({
+    //     owner: repo.owner.login,
+    //     repo: repo.name,
+    //     issue_number: issue.number as number,
+    //     body: newBody,
+    // })
 }
 
 async function run(): Promise<void> {
@@ -42,6 +70,9 @@ async function run(): Promise<void> {
 
         if (issue && issue.labels.map((label: any) => label.name).includes('epic')) {
             await updateEpic(githubToken, issue, repo)
+        }
+        else {
+            await updateNonEpic(githubToken, issue, repo)
         }
         // if issue is epic -> update epic
         // else if no epic -> find reference to other issues

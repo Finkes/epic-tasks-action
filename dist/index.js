@@ -40,7 +40,6 @@ const core = __importStar(__webpack_require__(186));
 const github = __importStar(__webpack_require__(438));
 function updateEpic(token, issue, repo) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.info('todo update epic');
         const octo = github.getOctokit(token);
         const events = yield octo
             .rest.issues.listEventsForTimeline({
@@ -53,12 +52,41 @@ function updateEpic(token, issue, repo) {
         core.info(JSON.stringify(events.data, undefined, 2));
         const taskListString = list.join('\n');
         core.info(taskListString);
+        const newBody = `### Linked Issues\n${taskListString}`;
         yield octo.rest.issues.update({
             owner: repo.owner.login,
             repo: repo.name,
             issue_number: issue.number,
-            body: taskListString,
+            body: newBody,
         });
+    });
+}
+function updateNonEpic(token, issue, repo) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const octo = github.getOctokit(token);
+        const events = yield octo
+            .rest.issues.listEventsForTimeline({
+            owner: repo.owner.login,
+            repo: repo.name,
+            issue_number: issue.number,
+        });
+        core.info(JSON.stringify(events.data, undefined, 2));
+        // const crossRefEvents = events.data.filter((event) => event.event === "cross-referenced" && event.source?.type === "issue")
+        // const list = crossRefEvents.map((event) => `- [${(event.source?.issue?.state !== "open" ? "x" : " ")}] ${event.source?.issue?.title} ([#${event.source?.issue?.number}](${event.source?.issue?.html_url}))`)
+        //
+        //
+        // const taskListString = list.join('\n')
+        //
+        // core.info(taskListString)
+        //
+        // const newBody = `### Linked Issues\n${taskListString}`
+        //
+        // await octo.rest.issues.update({
+        //     owner: repo.owner.login,
+        //     repo: repo.name,
+        //     issue_number: issue.number as number,
+        //     body: newBody,
+        // })
     });
 }
 function run() {
@@ -71,6 +99,9 @@ function run() {
             const repo = github.context.payload.repository;
             if (issue && issue.labels.map((label) => label.name).includes('epic')) {
                 yield updateEpic(githubToken, issue, repo);
+            }
+            else {
+                yield updateNonEpic(githubToken, issue, repo);
             }
             // if issue is epic -> update epic
             // else if no epic -> find reference to other issues
