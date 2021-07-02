@@ -18,4 +18,4 @@ jobs:
     steps:
       - uses: Finkes/epic-tasks-action@main
         with:
-          githubToken: "todo"
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
