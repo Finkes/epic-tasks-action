@@ -38,12 +38,40 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__webpack_require__(186));
 const github = __importStar(__webpack_require__(438));
+function updateEpic(token, issue, repo) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.info('todo update epic');
+        const events = yield github
+            .getOctokit(token)
+            .rest.issues.listEventsForTimeline({
+            owner: repo.owner.login,
+            repo: repo.name,
+            issue_number: issue.number,
+        });
+        core.info(JSON.stringify(events, undefined, 2));
+    });
+}
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            // const githubToken: string = core.getInput('githubToken')
+            const githubToken = core.getInput('githubToken');
             const payload = JSON.stringify(github.context.payload, undefined, 2);
             core.info(payload);
+            const issue = github.context.payload.issue;
+            const repo = github.context.payload.repository;
+            core.info(issue === null || issue === void 0 ? void 0 : issue.labels);
+            if (issue && issue.labels.includes('epic')) {
+                yield updateEpic(githubToken, issue, repo);
+            }
+            // if issue is epic -> update epic
+            // else if no epic -> find reference to other issues
+            // fetch other issues, filter for epics
+            // foreach epic -> update epic
+            // update Epic:
+            // find all references
+            // fetch issues
+            // render a task list
+            // find existing task list & merge (advanced)
             // console.log(`The event payload: ${payload}`);
             // core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
         }
