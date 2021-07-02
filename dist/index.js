@@ -79,7 +79,7 @@ function updateNonEpic(token, issue, repo) {
         commentEvents.map(event => {
             issueRefsInComments = issueRefsInComments.concat(extractIssueRefs(event.body));
         });
-        const issueRefs = [...new Set([...issueRefsInBody, ...issueRefsInComments])];
+        const issueRefs = [...new Set([...issueRefsInBody, ...issueRefsInComments])].map(issueRef => issueRef.replace("#", ""));
         core.info("found some references to other issues:");
         core.info(JSON.stringify(issueRefs));
         // todo fetch issues of refs, check for epic label (optional?)
