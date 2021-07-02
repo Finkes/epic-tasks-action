@@ -12,7 +12,7 @@ async function updateEpic(token: string, issue: any, repo: any): Promise<void> {
         issue_number: issue.number as number,
       })
 
-  core.info(JSON.stringify(events.data, undefined, 2))
+  core.info(JSON.stringify(events.data[0], undefined, 2))
 }
 
 async function run(): Promise<void> {
