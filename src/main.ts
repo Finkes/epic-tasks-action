@@ -46,8 +46,10 @@ async function updateNonEpic(token: string, issue: any, repo: any): Promise<void
 
     const commentEvents = events.data.filter((event) => event.event === "commented")
     const issueRefsInBody = extractIssueRefs(issue.body)
-    const issueRefsInComments: string[] = []
-    commentEvents.map(event => issueRefsInComments.concat(extractIssueRefs(event.body!)))
+    let issueRefsInComments: string[] = []
+    commentEvents.map(event => {
+        issueRefsInComments = issueRefsInComments.concat(extractIssueRefs(event.body!))
+    })
     const issueRefs = [...new Set([...issueRefsInBody, ...issueRefsInComments])]
 
     core.info("found some references to other issues:")

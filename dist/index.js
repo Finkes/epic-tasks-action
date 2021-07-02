@@ -75,8 +75,10 @@ function updateNonEpic(token, issue, repo) {
         core.info(JSON.stringify(events.data, undefined, 2));
         const commentEvents = events.data.filter((event) => event.event === "commented");
         const issueRefsInBody = extractIssueRefs(issue.body);
-        const issueRefsInComments = [];
-        commentEvents.map(event => issueRefsInComments.concat(extractIssueRefs(event.body)));
+        let issueRefsInComments = [];
+        commentEvents.map(event => {
+            issueRefsInComments = issueRefsInComments.concat(extractIssueRefs(event.body));
+        });
         const issueRefs = [...new Set([...issueRefsInBody, ...issueRefsInComments])];
         core.info("found some references to other issues:");
         core.info(JSON.stringify(issueRefs));
