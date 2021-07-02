@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+import {wait} from "./wait";
 
 async function updateEpic(token: string, issue: any, repo: any): Promise<void> {
     core.info(`updating task list for epic #${issue.number} (${issue.title})`)
@@ -32,6 +33,7 @@ async function updateEpic(token: string, issue: any, repo: any): Promise<void> {
 }
 
 async function updateNonEpic(token: string, issue: any, repo: any): Promise<void> {
+    core.info("update non epic")
     const octo = github.getOctokit(token)
 
     const events = await octo
@@ -43,6 +45,7 @@ async function updateNonEpic(token: string, issue: any, repo: any): Promise<void
     core.info(JSON.stringify(events.data, undefined, 2))
 
     const crossRefEvents = events.data.filter((event) => event.event === "cross-referenced" && event.source?.type === "issue")
+    await wait(5000) // wait until ref appears in timeline of epic?
     for(const crossRefEvent of crossRefEvents){
         await updateEpic(token, crossRefEvent.source?.issue, repo)
     }

@@ -38,6 +38,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__webpack_require__(186));
 const github = __importStar(__webpack_require__(438));
+const wait_1 = __webpack_require__(817);
 function updateEpic(token, issue, repo) {
     return __awaiter(this, void 0, void 0, function* () {
         core.info(`updating task list for epic #${issue.number} (${issue.title})`);
@@ -65,6 +66,7 @@ function updateEpic(token, issue, repo) {
 function updateNonEpic(token, issue, repo) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
+        core.info("update non epic");
         const octo = github.getOctokit(token);
         const events = yield octo
             .rest.issues.listEventsForTimeline({
@@ -74,6 +76,7 @@ function updateNonEpic(token, issue, repo) {
         });
         core.info(JSON.stringify(events.data, undefined, 2));
         const crossRefEvents = events.data.filter((event) => { var _a; return event.event === "cross-referenced" && ((_a = event.source) === null || _a === void 0 ? void 0 : _a.type) === "issue"; });
+        yield wait_1.wait(5000); // wait until ref appears in timeline of epic?
         for (const crossRefEvent of crossRefEvents) {
             yield updateEpic(token, (_a = crossRefEvent.source) === null || _a === void 0 ? void 0 : _a.issue, repo);
         }
@@ -111,6 +114,37 @@ function run() {
     });
 }
 run();
+
+
+/***/ }),
+
+/***/ 817:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.wait = void 0;
+function wait(milliseconds) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise(resolve => {
+            if (isNaN(milliseconds)) {
+                throw new Error('milliseconds not a number');
+            }
+            setTimeout(() => resolve('done!'), milliseconds);
+        });
+    });
+}
+exports.wait = wait;
 
 
 /***/ }),
