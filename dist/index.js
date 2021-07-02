@@ -48,7 +48,10 @@ function updateEpic(token, issue, repo) {
             repo: repo.name,
             issue_number: issue.number,
         });
+        const crossRefEvents = events.data.filter((event) => event.type === "cross-referenced" && event.source.type === "issue");
+        const list = crossRefEvents.map((event) => `- [${(event.issues.state !== "open" ? "x" : " ")}] ${event.source.issue.title} (${event.source.issue.number})`);
         core.info(JSON.stringify(events.data, undefined, 2));
+        core.info(list.join('\n'));
     });
 }
 function run() {

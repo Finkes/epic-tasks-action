@@ -12,7 +12,13 @@ async function updateEpic(token: string, issue: any, repo: any): Promise<void> {
         issue_number: issue.number as number,
       })
 
-  core.info(JSON.stringify(events.data, undefined, 2))
+    const crossRefEvents = events.data.filter((event: any) => event.type === "cross-referenced" && event.source.type === "issue")
+    const list = crossRefEvents.map((event :any) => `- [${(event.issues.state !== "open" ? "x" : " ")}] ${event.source.issue.title} (${event.source.issue.number})`)
+
+    core.info(JSON.stringify(events.data, undefined, 2))
+
+    core.info(list.join('\n'))
+
 }
 
 async function run(): Promise<void> {
