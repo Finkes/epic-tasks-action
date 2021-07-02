@@ -40,6 +40,7 @@ const core = __importStar(__webpack_require__(186));
 const github = __importStar(__webpack_require__(438));
 function updateEpic(token, issue, repo) {
     return __awaiter(this, void 0, void 0, function* () {
+        core.info(`updating task list for epic #${issue.number} (${issue.title})`);
         const octo = github.getOctokit(token);
         const events = yield octo
             .rest.issues.listEventsForTimeline({
@@ -62,6 +63,7 @@ function updateEpic(token, issue, repo) {
     });
 }
 function updateNonEpic(token, issue, repo) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const octo = github.getOctokit(token);
         const events = yield octo
@@ -71,22 +73,10 @@ function updateNonEpic(token, issue, repo) {
             issue_number: issue.number,
         });
         core.info(JSON.stringify(events.data, undefined, 2));
-        // const crossRefEvents = events.data.filter((event) => event.event === "cross-referenced" && event.source?.type === "issue")
-        // const list = crossRefEvents.map((event) => `- [${(event.source?.issue?.state !== "open" ? "x" : " ")}] ${event.source?.issue?.title} ([#${event.source?.issue?.number}](${event.source?.issue?.html_url}))`)
-        //
-        //
-        // const taskListString = list.join('\n')
-        //
-        // core.info(taskListString)
-        //
-        // const newBody = `### Linked Issues\n${taskListString}`
-        //
-        // await octo.rest.issues.update({
-        //     owner: repo.owner.login,
-        //     repo: repo.name,
-        //     issue_number: issue.number as number,
-        //     body: newBody,
-        // })
+        const crossRefEvents = events.data.filter((event) => { var _a; return event.event === "cross-referenced" && ((_a = event.source) === null || _a === void 0 ? void 0 : _a.type) === "issue"; });
+        for (const crossRefEvent of crossRefEvents) {
+            yield updateEpic(token, (_a = crossRefEvent.source) === null || _a === void 0 ? void 0 : _a.issue, repo);
+        }
     });
 }
 function run() {

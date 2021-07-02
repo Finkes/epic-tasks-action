@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 
 async function updateEpic(token: string, issue: any, repo: any): Promise<void> {
+    core.info(`updating task list for epic #${issue.number} (${issue.title})`)
     const octo = github.getOctokit(token)
 
     const events = await octo
@@ -41,22 +42,10 @@ async function updateNonEpic(token: string, issue: any, repo: any): Promise<void
         })
     core.info(JSON.stringify(events.data, undefined, 2))
 
-    // const crossRefEvents = events.data.filter((event) => event.event === "cross-referenced" && event.source?.type === "issue")
-    // const list = crossRefEvents.map((event) => `- [${(event.source?.issue?.state !== "open" ? "x" : " ")}] ${event.source?.issue?.title} ([#${event.source?.issue?.number}](${event.source?.issue?.html_url}))`)
-    //
-    //
-    // const taskListString = list.join('\n')
-    //
-    // core.info(taskListString)
-    //
-    // const newBody = `### Linked Issues\n${taskListString}`
-    //
-    // await octo.rest.issues.update({
-    //     owner: repo.owner.login,
-    //     repo: repo.name,
-    //     issue_number: issue.number as number,
-    //     body: newBody,
-    // })
+    const crossRefEvents = events.data.filter((event) => event.event === "cross-referenced" && event.source?.type === "issue")
+    for(const crossRefEvent of crossRefEvents){
+        await updateEpic(token, crossRefEvent.source?.issue, repo)
+    }
 }
 
 async function run(): Promise<void> {
