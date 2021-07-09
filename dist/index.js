@@ -49,7 +49,7 @@ function updateEpic(token, issue, repo) {
             issue_number: issue.number,
         });
         const crossRefEvents = events.data.filter((event) => { var _a; return event.event === "cross-referenced" && ((_a = event.source) === null || _a === void 0 ? void 0 : _a.type) === "issue"; });
-        const list = crossRefEvents.map((event) => { var _a, _b, _c, _d, _e, _f, _g, _h; return `- [${(((_b = (_a = event.source) === null || _a === void 0 ? void 0 : _a.issue) === null || _b === void 0 ? void 0 : _b.state) !== "open" ? "x" : " ")}] ${(_d = (_c = event.source) === null || _c === void 0 ? void 0 : _c.issue) === null || _d === void 0 ? void 0 : _d.title} ([#${(_f = (_e = event.source) === null || _e === void 0 ? void 0 : _e.issue) === null || _f === void 0 ? void 0 : _f.number}](${(_h = (_g = event.source) === null || _g === void 0 ? void 0 : _g.issue) === null || _h === void 0 ? void 0 : _h.html_url}))`; });
+        const list = crossRefEvents.map((event) => { var _a, _b, _c, _d, _e, _f, _g, _h; return `- ${(((_b = (_a = event.source) === null || _a === void 0 ? void 0 : _a.issue) === null || _b === void 0 ? void 0 : _b.state) !== "open" ? "🔴" : "🟢")} ${(_d = (_c = event.source) === null || _c === void 0 ? void 0 : _c.issue) === null || _d === void 0 ? void 0 : _d.title} ([#${(_f = (_e = event.source) === null || _e === void 0 ? void 0 : _e.issue) === null || _f === void 0 ? void 0 : _f.number}](${(_h = (_g = event.source) === null || _g === void 0 ? void 0 : _g.issue) === null || _h === void 0 ? void 0 : _h.html_url}))`; });
         core.info(JSON.stringify(events.data, undefined, 2));
         const taskListString = list.join('\n');
         core.info(taskListString);
@@ -67,7 +67,7 @@ function addOrUpdateTaskListToIssueBody(oldBody, taskList) {
     const regexPattern = '(?<=<!-- BEGIN -->)(.*)(?=<!-- END -->)';
     const regex = new RegExp(regexPattern, 's');
     if (new RegExp(regexPattern, 's').test(oldBody)) {
-        return oldBody.replace(regex, taskList);
+        return oldBody.replace(regex, '\n' + taskList);
     }
     return `${oldBody}\n<!-- BEGIN -->\n${taskList}\n<!-- END -->`;
 }
