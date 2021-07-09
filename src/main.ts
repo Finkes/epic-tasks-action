@@ -14,7 +14,7 @@ async function updateEpic(token: string, issue: any, repo: any): Promise<void> {
         })
 
     const crossRefEvents = events.data.filter((event) => event.event === "cross-referenced" && event.source?.type === "issue")
-    const list = crossRefEvents.map((event) => `- [${(event.source?.issue?.state !== "open" ? "x" : " ")}] ${event.source?.issue?.title} ([#${event.source?.issue?.number}](${event.source?.issue?.html_url}))`)
+    const list = crossRefEvents.map((event) => `- ${(event.source?.issue?.state !== "open" ? "🔴" : "🟢")} ${event.source?.issue?.title} ([#${event.source?.issue?.number}](${event.source?.issue?.html_url}))`)
 
     core.info(JSON.stringify(events.data, undefined, 2))
 
@@ -37,7 +37,7 @@ function addOrUpdateTaskListToIssueBody(oldBody: string, taskList: string){
     const regexPattern = '(?<=<!-- BEGIN -->)(.*)(?=<!-- END -->)'
     const regex = new RegExp(regexPattern, 's')
     if(new RegExp(regexPattern, 's').test(oldBody)){
-        return oldBody.replace(regex, taskList)
+        return oldBody.replace(regex, '\n' + taskList)
     }
     return`${oldBody}\n<!-- BEGIN -->\n${taskList}\n<!-- END -->`
 }
