@@ -39,8 +39,7 @@ function addOrUpdateTaskListToIssueBody(oldBody: string, taskList: string){
     if(new RegExp(regexPattern, 's').test(oldBody)){
         return oldBody.replace(regex, taskList)
     }
-    return`${oldBody}\n${taskList}`
-
+    return`${oldBody}\n<!-- BEGIN -->\n${taskList}\n<!-- END -->`
 }
 
 async function updateNonEpic(token: string, issue: any, repo: any): Promise<void> {

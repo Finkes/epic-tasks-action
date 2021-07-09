@@ -69,7 +69,7 @@ function addOrUpdateTaskListToIssueBody(oldBody, taskList) {
     if (new RegExp(regexPattern, 's').test(oldBody)) {
         return oldBody.replace(regex, taskList);
     }
-    return `${oldBody}\n${taskList}`;
+    return `${oldBody}\n<!-- BEGIN -->\n${taskList}\n<!-- END -->`;
 }
 function updateNonEpic(token, issue, repo) {
     return __awaiter(this, void 0, void 0, function* () {
