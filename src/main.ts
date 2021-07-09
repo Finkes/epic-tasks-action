@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {wait} from "./wait";
+import {wait} from './wait'
 
 async function updateEpic(token: string, issue: any, repo: any): Promise<void> {
     core.info(`updating task list for epic #${issue.number} (${issue.title})`)
@@ -22,7 +22,8 @@ async function updateEpic(token: string, issue: any, repo: any): Promise<void> {
 
     core.info(taskListString)
 
-    const newBody = `### Linked Issues\n${taskListString}`
+    const newTaskList = `### Linked Issues\n${taskListString}`
+    const newBody = addOrUpdateTaskListToIssueBody(issue.body, newTaskList)
 
     await octo.rest.issues.update({
         owner: repo.owner.login,
@@ -30,6 +31,16 @@ async function updateEpic(token: string, issue: any, repo: any): Promise<void> {
         issue_number: issue.number as number,
         body: newBody,
     })
+}
+
+function addOrUpdateTaskListToIssueBody(oldBody: string, taskList: string){
+    const regexPattern = '(?<=<!-- BEGIN -->)(.*)(?=<!-- END -->)'
+    const regex = new RegExp(regexPattern, 's')
+    if(new RegExp(regexPattern, 's').test(oldBody)){
+        return oldBody.replace(regex, taskList)
+    }
+    return`${oldBody}\n${taskList}`
+
 }
 
 async function updateNonEpic(token: string, issue: any, repo: any): Promise<void> {
@@ -89,6 +100,17 @@ function extractIssueRefs(text: string){
 }
 
 async function run(): Promise<void> {
+    const s = `
+        before
+        <!-- BEGIN -->
+        - [ ] test (#test)
+        <!-- END -->
+        after
+    `
+    core.info("test")
+    const regex = /(?<=<!-- BEGIN -->)(.*)(?=<!-- END -->)/s
+    const newString = s.replace(regex, "new content list")
+    core.info(newString)
     try {
         const githubToken: string = core.getInput('githubToken')
         const payload = JSON.stringify(github.context.payload, undefined, 2)

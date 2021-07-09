@@ -53,7 +53,8 @@ function updateEpic(token, issue, repo) {
         core.info(JSON.stringify(events.data, undefined, 2));
         const taskListString = list.join('\n');
         core.info(taskListString);
-        const newBody = `### Linked Issues\n${taskListString}`;
+        const newTaskList = `### Linked Issues\n${taskListString}`;
+        const newBody = addOrUpdateTaskListToIssueBody(issue.body, newTaskList);
         yield octo.rest.issues.update({
             owner: repo.owner.login,
             repo: repo.name,
@@ -61,6 +62,14 @@ function updateEpic(token, issue, repo) {
             body: newBody,
         });
     });
+}
+function addOrUpdateTaskListToIssueBody(oldBody, taskList) {
+    const regexPattern = '(?<=<!-- BEGIN -->)(.*)(?=<!-- END -->)';
+    const regex = new RegExp(regexPattern, 's');
+    if (new RegExp(regexPattern, 's').test(oldBody)) {
+        return oldBody.replace(regex, taskList);
+    }
+    return `${oldBody}\n${taskList}`;
 }
 function updateNonEpic(token, issue, repo) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -115,6 +124,17 @@ function extractIssueRefs(text) {
 }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        const s = `
+        before
+        <!-- BEGIN -->
+        - [ ] test (#test)
+        <!-- END -->
+        after
+    `;
+        core.info("test");
+        const regex = /(?<=<!-- BEGIN -->)(.*)(?=<!-- END -->)/s;
+        const newString = s.replace(regex, "new content list");
+        core.info(newString);
         try {
             const githubToken = core.getInput('githubToken');
             const payload = JSON.stringify(github.context.payload, undefined, 2);
